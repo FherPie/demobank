@@ -23,12 +23,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.dtos.RequestCuentaDto;
 import com.example.demo.modelo.Cliente;
 import com.example.demo.modelo.Cuenta;
 import com.example.demo.modelo.EEstado;
 import com.example.demo.modelo.ETipoCuenta;
-import com.example.demo.payload.RequestClient;
-import com.example.demo.payload.RequestCuenta;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -52,10 +52,10 @@ public class CuentaControllerTest {
 	public void testAddCuentaSuccess() throws URISyntaxException {
 		final String baseUrl = "http://localhost:" + randomServerPort + "/api/cuenta/";
 		URI uri = new URI(baseUrl);
-		RequestCuenta requestCuenta = RequestCuenta.builder().estado(EEstado.ACTIVO).numeroCuenta("123456789")
+		RequestCuentaDto requestCuenta = RequestCuentaDto.builder().estado(EEstado.ACTIVO).numeroCuenta("123456789")
 				.saldoInicial(new BigDecimal(2000)).tipoCuenta(ETipoCuenta.AHORROS).build();
-		RequestClient requestClient = RequestClient.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestClient> request = new HttpEntity<>(requestClient);
+		RequestClientDto requestClient = RequestClientDto.builder().cuenta(requestCuenta).clienteId(2L).build();
+		HttpEntity<RequestClientDto> request = new HttpEntity<>(requestClient);
 		System.out.println(baseUrl);
 		ResponseEntity<Cuenta> result = this.restTemplate.postForEntity(uri, request, Cuenta.class);
 		// Verify request succeed
@@ -84,9 +84,9 @@ public class CuentaControllerTest {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("id", "4");
 		
-		RequestCuenta requestCuenta = RequestCuenta.builder().estado(EEstado.ACTIVO).numeroCuenta("123456789")
+		RequestCuentaDto requestCuenta = RequestCuentaDto.builder().estado(EEstado.ACTIVO).numeroCuenta("123456789")
 				.saldoInicial(new BigDecimal(3000)).tipoCuenta(ETipoCuenta.AHORROS).build();
-		HttpEntity<RequestCuenta> request = new HttpEntity<>(requestCuenta);
+		HttpEntity<RequestCuentaDto> request = new HttpEntity<>(requestCuenta);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
 		//URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl).path("/api/cuenta/").path("/{id}").build().toUri();
 		ResponseEntity<Cuenta> result = this.restTemplate.exchange(builder.buildAndExpand(params).toUri(), HttpMethod.PUT,request , Cuenta.class);

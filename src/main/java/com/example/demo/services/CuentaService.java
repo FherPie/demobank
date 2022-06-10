@@ -8,9 +8,9 @@ import org.hibernate.loader.plan.exec.process.internal.AbstractRowReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dtos.RequestClientDto;
 import com.example.demo.modelo.Cliente;
 import com.example.demo.modelo.Cuenta;
-import com.example.demo.payload.RequestClient;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.CuentaRepository;
 import com.example.demo.repository.PersonaRepository;
@@ -28,7 +28,7 @@ public class CuentaService {
 	CuentaRepository cuentaRepository;
 
 	@Transactional
-	public Cuenta crearCuenta(RequestClient requestClient) {
+	public Cuenta crearCuenta(RequestClientDto requestClient) {
 		Cuenta cuenta = null;
 		try {
 			Optional<Cliente> cliente = clienteRepository.findById(requestClient.getClienteId());

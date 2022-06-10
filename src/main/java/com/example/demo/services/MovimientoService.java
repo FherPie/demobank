@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,12 +10,13 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dtos.RequestMovimientoDto;
 import com.example.demo.modelo.Cuenta;
 import com.example.demo.modelo.ETipoMovimiento;
 import com.example.demo.modelo.Movimiento;
-import com.example.demo.payload.RequestMovimiento;
 import com.example.demo.repository.CuentaRepository;
 import com.example.demo.repository.MovimientoRepository;
+import com.example.demo.util.Constante;
 
 @Service
 public class MovimientoService {
@@ -26,17 +28,13 @@ public class MovimientoService {
 	MovimientoRepository movimientoRepository;
 
 	@Transactional
-	public boolean crearMovimiento(RequestMovimiento requestMovimiento) {
+	public String crearMovimiento(RequestMovimientoDto requestMovimiento) {
 		try {
 			Optional<Cuenta> cuenta = cuentaRepository.findById(requestMovimiento.getCuentaId());
 
 			List<Movimiento> movimientos = movimientoRepository.fecthByCuentaId(requestMovimiento.getCuentaId());
-
-			if (cuenta.isPresent() && validaryCrearMovimiento(movimientos, cuenta.get(), requestMovimiento)) {
-				return true;
-			} else {
-				return false;
-			}
+		    return  validaryCrearMovimiento(movimientos, cuenta.get(), requestMovimiento);
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -45,51 +43,74 @@ public class MovimientoService {
 
 	}
 
-	private boolean validaryCrearMovimiento(List<Movimiento> movimientos, Cuenta cuenta,
-			RequestMovimiento requestMovimiento) {
-
+	private String validaryCrearMovimiento(List<Movimiento> movimientos, Cuenta cuenta,
+			RequestMovimientoDto requestMovimiento) {
 		try {
 			Movimiento movimiento = null;
+			
+//			requestMovimiento.getValor().compareTo(BigDecimal.valueOf(Constante.MONTO_REIIRO_MAXIMO))>0
 			if (movimientos.isEmpty()) {// Si no hay movimientos
 				if (requestMovimiento.getTipo() == ETipoMovimiento.RETIRO) {
 					if (requestMovimiento.getValor().compareTo(cuenta.getSaldoInicial()) > 0) { // Mayor retiro que
 																								// saldo incial
-						return false;
+						return Constante.SALDO_NO_DISPONIBLE;
 					} else {
-						movimiento = Movimiento.builder().cuenta(cuenta).fecha(LocalDateTime.now())
+						movimiento = Movimiento.builder().cuenta(cuenta).fecha(requestMovimiento.getFecha())
 								.saldo(cuenta.getSaldoInicial().subtract(requestMovimiento.getValor()))
 								.tipo(requestMovimiento.getTipo()).valor(requestMovimiento.getValor()).build();
 						movimientoRepository.save(movimiento);
+						return Constante.TRANSACCION_EXITOSA;
 					}
 				} else { // DEPOSITO
-					movimiento = Movimiento.builder().cuenta(cuenta).fecha(LocalDateTime.now())
+					movimiento = Movimiento.builder().cuenta(cuenta).fecha(requestMovimiento.getFecha())
 							.saldo(requestMovimiento.getValor().add(cuenta.getSaldoInicial()))
 							.tipo(requestMovimiento.getTipo()).valor(requestMovimiento.getValor()).build();
 					movimientoRepository.save(movimiento);
+					return Constante.TRANSACCION_EXITOSA;
 				}
 			} else { // Movimientos
 				Movimiento ultimoMovimiento = movimientos.get(movimientos.size() - 1);
 				if (requestMovimiento.getTipo() == ETipoMovimiento.RETIRO) {
 					if (requestMovimiento.getValor().compareTo(ultimoMovimiento.getSaldo()) > 0) { // Mayor retiro que
 																								// saldO
-						return false;
+						return Constante.SALDO_NO_DISPONIBLE;
 					} else {
-						movimiento = Movimiento.builder().cuenta(cuenta).fecha(LocalDateTime.now())
+						movimiento = Movimiento.builder().cuenta(cuenta).fecha(requestMovimiento.getFecha())
 								.saldo(ultimoMovimiento.getSaldo().subtract(requestMovimiento.getValor()))
 								.tipo(requestMovimiento.getTipo()).valor(requestMovimiento.getValor()).build();
 						movimientoRepository.save(movimiento);
+						return Constante.TRANSACCION_EXITOSA;
 					}
 				} else { // DEPOSITO
-					movimiento = Movimiento.builder().cuenta(cuenta).fecha(LocalDateTime.now())
+					movimiento = Movimiento.builder().cuenta(cuenta).fecha(requestMovimiento.getFecha())
 							.saldo(requestMovimiento.getValor().add(ultimoMovimiento.getSaldo()))
 							.tipo(requestMovimiento.getTipo()).valor(requestMovimiento.getValor()).build();
 					movimientoRepository.save(movimiento);
+					return Constante.TRANSACCION_EXITOSA;
 				}
 			}
 		} catch (Exception e) {
 			throw e;
 		}
-		return true;
+	}
+	
+
+	
+
+	public void guardarMovimiento(Cuenta cuenta, RequestMovimientoDto requestMovimiento) {
+		Movimiento movimiento=null;
+		movimiento = Movimiento.builder().cuenta(cuenta).fecha(requestMovimiento.getFecha())
+				.saldo(cuenta.getSaldoInicial().subtract(requestMovimiento.getValor()))
+				.tipo(requestMovimiento.getTipo()).valor(requestMovimiento.getValor()).build();
+		movimientoRepository.save(movimiento);
+	}
+
+	public void guardarMovimiento2(Cuenta cuenta, RequestMovimientoDto requestMovimiento, Movimiento ultimoMovimiento) {
+		Movimiento movimiento=null;
+		movimiento = Movimiento.builder().cuenta(cuenta).fecha(requestMovimiento.getFecha())
+				.saldo(requestMovimiento.getValor().add(ultimoMovimiento.getSaldo()))
+				.tipo(requestMovimiento.getTipo()).valor(requestMovimiento.getValor()).build();
+		movimientoRepository.save(movimiento);
 	}
 
 }

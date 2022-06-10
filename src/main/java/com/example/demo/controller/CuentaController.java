@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.dtos.RequestCuentaDto;
 import com.example.demo.modelo.Cuenta;
-import com.example.demo.payload.RequestClient;
-import com.example.demo.payload.RequestCuenta;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.CuentaRepository;
 import com.example.demo.services.ClientService;
@@ -73,7 +73,7 @@ public class CuentaController {
 	}
 
 	@PostMapping("/cuenta")
-	public ResponseEntity<Cuenta> createCuenta(@RequestBody RequestClient requestClient) {
+	public ResponseEntity<Cuenta> createCuenta(@RequestBody RequestClientDto requestClient) {
 		try {
 			return new ResponseEntity<>(cuentaService.crearCuenta(requestClient), HttpStatus.CREATED);
 		} catch (Exception e) {
@@ -83,7 +83,7 @@ public class CuentaController {
 
 	@SuppressWarnings("static-access")
 	@PutMapping("/cuenta/{id}")
-	public ResponseEntity<Cuenta> updateCuenta(@PathVariable("id") long id, @RequestBody RequestCuenta requestCuenta) {
+	public ResponseEntity<Cuenta> updateCuenta(@PathVariable("id") long id, @RequestBody RequestCuentaDto requestCuenta) {
 		try {
 			Optional<Cuenta> cuentaSelected = cuentaRepository.findById(id);
 			if (cuentaSelected.isPresent()) {

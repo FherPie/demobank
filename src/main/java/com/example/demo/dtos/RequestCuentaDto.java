@@ -1,4 +1,4 @@
-package com.example.demo.payload;
+package com.example.demo.dtos;
 
 import java.math.BigDecimal;
 
@@ -17,7 +17,7 @@ import lombok.Setter;
 @Getter @Setter 
 @NoArgsConstructor // <--- THIS is it
 @AllArgsConstructor
-public class RequestCuenta {
+public class RequestCuentaDto {
 	
 
 

@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dtos.RequestClientDto;
 import com.example.demo.modelo.Cliente;
 import com.example.demo.modelo.Persona;
-import com.example.demo.payload.RequestClient;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.PersonaRepository;
 import com.example.demo.services.ClientService;
@@ -70,7 +70,7 @@ public class ClienteController {
 	}
 
 	@PostMapping("/clients")
-	public ResponseEntity<Cliente> createClient(@RequestBody RequestClient requestClient) {
+	public ResponseEntity<Cliente> createClient(@RequestBody RequestClientDto requestClient) {
 		try {
 			return new ResponseEntity<>(clienteService.crearCliente(requestClient), HttpStatus.CREATED);
 		} catch (Exception e) {

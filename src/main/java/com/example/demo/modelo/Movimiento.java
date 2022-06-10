@@ -2,7 +2,7 @@ package com.example.demo.modelo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter 
+@Getter
 @Setter 
 @Builder
 @AllArgsConstructor
@@ -54,9 +54,9 @@ public class Movimiento  implements Serializable {/**
 	@Column(name = "valor")
     private BigDecimal valor;
 	
-
-	@Column(name = "fecha", columnDefinition = "TIMESTAMP")
-	private LocalDateTime fecha;
+	@Temporal(TemporalType.DATE)
+	@Column(name = "fecha")
+	private Date fecha;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="cuenta_Id")

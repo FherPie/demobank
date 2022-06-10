@@ -1,4 +1,4 @@
-package com.example.demo.payload;
+package com.example.demo.dtos;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor 
 @AllArgsConstructor
-public class RequestClient {
+public class RequestClientDto {
 
 	private String password;
 
@@ -40,8 +40,8 @@ public class RequestClient {
 
 	private Long clienteId;
 
-	private List<RequestCuenta> cuentas;
+	private List<RequestCuentaDto> cuentas;
 
-	private RequestCuenta cuenta;
+	private RequestCuentaDto cuenta;
 
 }

@@ -1,7 +1,10 @@
 package com.example.demo.controller;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dtos.RequestMovimientoDto;
 import com.example.demo.modelo.Movimiento;
-import com.example.demo.payload.RequestMovimiento;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.MovimientoRepository;
 import com.example.demo.services.ClientService;
@@ -35,35 +38,34 @@ public class MovimientoController {
 
 	@Autowired
 	ClientService clienteService;
-	
 
 	@Autowired
 	CuentaService cuentaService;
-	
+
 	@Autowired
 	MovimientoService movimientoService;
-	
+
 	@Autowired
 	MovimientoRepository movimientoRepository;
-	
+
 	@GetMapping("/movimiento")
-	  public ResponseEntity<List<Movimiento>> getAllMovimientoByCuentaId(@RequestParam(required = false) Long cuentaId) {	
+	public ResponseEntity<List<Movimiento>> getAllMovimientoByCuentaId(@RequestParam(required = false) Long cuentaId) {
 		System.out.println(cuentaId);
-	    try {
-	    	List<Movimiento> movimientos = null;
-	      if (cuentaId==null)
-	          return new ResponseEntity<>( HttpStatus.NO_CONTENT);
-	      else
-	    	  movimientos= movimientoRepository.fecthByCuentaId(cuentaId);
-	      if (movimientos==null) {
-	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	      }
-	      return new ResponseEntity<>(movimientos, HttpStatus.OK);
-	    } catch (Exception e) {
-	    	e.printStackTrace();
-	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	  }
+		try {
+			List<Movimiento> movimientos = null;
+			if (cuentaId == null)
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			else
+				movimientos = movimientoRepository.fecthByCuentaId(cuentaId);
+			if (movimientos == null) {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<>(movimientos, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 	@GetMapping("/movimiento/{id}")
 	public ResponseEntity<Movimiento> getMovimientoById(@PathVariable("id") long id) {
@@ -76,7 +78,11 @@ public class MovimientoController {
 	}
 
 	@PostMapping("/movimiento")
-	public ResponseEntity<Boolean> createMovimiento(@RequestBody RequestMovimiento requestMovimiento) {
+	public ResponseEntity<String> createMovimiento(@RequestBody RequestMovimientoDto requestMovimiento) {
+		System.out.println(requestMovimiento.getFecha());
+		System.out.println(Locale.getDefault());
+		System.out.println(TimeZone.getDefault());
+		
 		try {
 			return new ResponseEntity<>(movimientoService.crearMovimiento(requestMovimiento), HttpStatus.OK);
 		} catch (Exception e) {
@@ -85,7 +91,8 @@ public class MovimientoController {
 	}
 
 	@PutMapping("/movimiento/{id}")
-	public ResponseEntity<Movimiento> updateMovimiento(@PathVariable("id") long id, @RequestBody RequestMovimiento requestMovimiento) {
+	public ResponseEntity<Movimiento> updateMovimiento(@PathVariable("id") long id,
+			@RequestBody RequestMovimientoDto requestMovimiento) {
 		try {
 			Optional<Movimiento> movimientoSelected = movimientoRepository.findById(id);
 			if (movimientoSelected.isPresent()) {
@@ -95,7 +102,7 @@ public class MovimientoController {
 				movimiento.setTipo(requestMovimiento.getTipo());
 				movimiento.setValor(requestMovimiento.getValor());
 				movimiento.setFecha(requestMovimiento.getFecha());
-				movimiento=movimientoRepository.save(movimiento);
+				movimiento = movimientoRepository.save(movimiento);
 				return new ResponseEntity<>(movimiento, HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -115,6 +122,27 @@ public class MovimientoController {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@GetMapping("/movimientoxCliente")
+	public ResponseEntity<List<Movimiento>> getAllMovimientoByClienteId(@RequestParam(required = true) Long clienteId, @RequestParam(required = true) Date startDate, @RequestParam(required = true) Date  endDate  ) {
+		System.out.println(clienteId);
+		System.out.println(startDate);
+		System.out.println(endDate);
+		try {
+			List<Movimiento> movimientos = null;
+			if (clienteId == null)
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			else
+				movimientos = movimientoRepository.fecthByClienteId(startDate, endDate, clienteId);
+			if (movimientos == null) {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<>(movimientos, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

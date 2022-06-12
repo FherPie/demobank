@@ -21,7 +21,7 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
 	
   
     @Query("SELECT "
-            + "DISTINCT (movimiento) from Movimiento movimiento "
+            + " (movimiento) from Movimiento movimiento "
             + " INNER JOIN  "
             + "movimiento.cuenta cuenta  "
             + "WHERE "
@@ -31,14 +31,21 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
 	
 
     @Query("SELECT "
-            + "DISTINCT (movimiento) from Movimiento movimiento "
+            + " (movimiento) from Movimiento movimiento "
             + " INNER JOIN  "
             + "movimiento.cuenta.cliente cliente  "
             + "WHERE "
             + "cliente.id = :clienteId  and movimiento.fecha BETWEEN :startDate AND :endDate")
-    List<Movimiento> fecthByClienteId(@Param("startDate")Date startDate,@Param("endDate")Date endDate, long clienteId);
+    List<Movimiento> fecthMovimientoBetweenDatesAndClientID(@Param("startDate")Date startDate,@Param("endDate")Date endDate, long clienteId);
     
     
+    @Query("SELECT "
+            + " (movimiento) from Movimiento movimiento "
+            + " INNER JOIN  "
+            + "movimiento.cuenta cuenta  "
+            + "WHERE "
+            + "cuenta.id = :cuentaId and movimiento.fecha BETWEEN :startDate AND :endDate and movimiento.valor < 0")
+    List<Movimiento> fecthByMovimientoBetweenDatesAndCuentaId(@Param("startDate")Date startDate,@Param("endDate")Date endDate,long cuentaId);
     
 
 }

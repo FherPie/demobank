@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.example.demo.modelo.EEstado;
 import com.example.demo.modelo.EGenero;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +18,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor 
 @AllArgsConstructor
+@JsonInclude(Include.NON_NULL)
 public class RequestClientDto {
 
 	private String password;
@@ -26,7 +29,7 @@ public class RequestClientDto {
 
 	private EGenero genero;
 
-	private int edad;
+	private Integer edad;
 
 	private String identificacion;
 

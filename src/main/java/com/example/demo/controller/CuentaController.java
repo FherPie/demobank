@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,18 +46,30 @@ public class CuentaController {
 	CuentaRepository cuentaRepository;
 	
 	@GetMapping("/cuenta")
-	  public ResponseEntity<List<Cuenta>> getAllCuentaByClienteIdentification(@RequestParam(required = false) Long cliendId) {	
+	  public ResponseEntity<List<RequestCuentaDto>> getAllCuentaByClienteIdentification(@RequestParam(required = false) Long cliendId) {	
 		System.out.println(cliendId);
 	    try {
-	    	List<Cuenta> client = null;
+	    	List<Cuenta> listCuenta = null;
 	      if (cliendId==null)
-	          return new ResponseEntity<>( HttpStatus.NO_CONTENT);
+	    	  listCuenta= cuentaRepository.fecthCuentas();
 	      else
-	    	  client= cuentaRepository.fecthByCliente(cliendId);
-	      if (client==null) {
+	    	  listCuenta= cuentaRepository.fecthByCliente(cliendId);
+	      
+	   List<RequestCuentaDto> listaRequestCuentaDto=   listCuenta.stream().map(cuenta-> {
+	    	  RequestCuentaDto requestCuenta= RequestCuentaDto.builder()
+	    			  .numeroCuenta(cuenta.getNumeroCuenta())
+	    			  .tipoCuenta(cuenta.getTipoCuenta())
+	    			  .saldoInicial(cuenta.getSaldoInicial())
+	    			  .estado(cuenta.getEstado())
+	    			  .cliente(cuenta.getCliente().getPersona().getNombre()+" "+cuenta.getCliente().getPersona().getApellido())
+	    			  .build();
+	    	  return requestCuenta;
+	      }).collect(Collectors.toList());
+	            
+	      if (listaRequestCuentaDto==null) {
 	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	      }
-	      return new ResponseEntity<>(client, HttpStatus.OK);
+	      return new ResponseEntity<>(listaRequestCuentaDto, HttpStatus.OK);
 	    } catch (Exception e) {
 	    	e.printStackTrace();
 	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

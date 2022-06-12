@@ -27,6 +27,13 @@ public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
     List<Cuenta> fecthByCliente(long clienteId);
 		
     
+    @Query("SELECT "
+            + "DISTINCT (cuenta) from Cuenta cuenta "
+            + " INNER JOIN  "
+            + "cuenta.cliente cliente  ")
+    List<Cuenta> fecthCuentas();
+		
+    
     //TO DO CUENTA CON TODOS LOS MOVIMIENTOS
 //	  @Query("SELECT "
 //	            + "DISTINCT (cliente) from Cliente cliente "

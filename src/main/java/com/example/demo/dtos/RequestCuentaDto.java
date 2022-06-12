@@ -15,7 +15,7 @@ import lombok.Setter;
 
  @Builder
 @Getter @Setter 
-@NoArgsConstructor // <--- THIS is it
+@NoArgsConstructor 
 @AllArgsConstructor
 public class RequestCuentaDto {
 	
@@ -26,5 +26,6 @@ public class RequestCuentaDto {
     @NotNull
     private BigDecimal saldoInicial;
     private EEstado estado;
+    private String cliente;
 
 }

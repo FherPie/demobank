@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dtos.ReporteCuentasDto;
 import com.example.demo.dtos.RequestMovimientoDto;
+import com.example.demo.modelo.ETipoMovimiento;
 import com.example.demo.modelo.Movimiento;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.MovimientoRepository;
@@ -125,21 +129,40 @@ public class MovimientoController {
 		}
 	}
 
-	@GetMapping("/movimientoxCliente")
-	public ResponseEntity<List<Movimiento>> getAllMovimientoByClienteId(@RequestParam(required = true) Long clienteId, @RequestParam(required = true) Date startDate, @RequestParam(required = true) Date  endDate  ) {
+	@GetMapping("/reporteMovimientoxCliente")
+	public ResponseEntity<List<ReporteCuentasDto>> getAllMovimientoByClienteId(@RequestParam(required = true) Long clienteId, @RequestParam(required = true) Date startDate, @RequestParam(required = true) Date  endDate  ) {
 		System.out.println(clienteId);
 		System.out.println(startDate);
 		System.out.println(endDate);
+		
+		SimpleDateFormat newFormat = new SimpleDateFormat("dd-MM-yyyy");
+
 		try {
-			List<Movimiento> movimientos = null;
+			List<Movimiento>  movimientos = null;
 			if (clienteId == null)
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			else
-				movimientos = movimientoRepository.fecthByClienteId(startDate, endDate, clienteId);
-			if (movimientos == null) {
+				movimientos = movimientoRepository.fecthMovimientoBetweenDatesAndClientID(startDate, endDate, clienteId);
+			   
+			 List<ReporteCuentasDto> reportes= movimientos.stream().map(movimiento -> {
+				 ReporteCuentasDto reporte;
+				reporte = ReporteCuentasDto.builder()
+						 .nombreCliente(movimiento.getCuenta().getCliente().getPersona().getNombre()+ " "+movimiento.getCuenta().getCliente().getPersona().getApellido())
+						 .numeroCuenta(movimiento.getCuenta().getNumeroCuenta())
+						 .saldoDisponible(String.format("%.2f", movimiento.getSaldo()))
+						 .movimiento(String.format("%.2f", movimiento.getValor()))
+						 .tipoCuenta(movimiento.getCuenta().getTipoCuenta().toString())
+						 .fecha( newFormat.format(movimiento.getFecha()))
+						 .estado(movimiento.getCuenta().getEstado().toString())
+						 .saldoInicial(String.format("%.2f",movimiento.getCuenta().getSaldoInicial()))
+						 .build();
+				  return reporte;
+			 }).collect(Collectors.toList());;
+			
+			if (reportes == null) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			return new ResponseEntity<>(movimientos, HttpStatus.OK);
+			return new ResponseEntity<>(reportes	, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

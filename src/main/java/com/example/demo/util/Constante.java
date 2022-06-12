@@ -1,8 +1,10 @@
 package com.example.demo.util;
 
+import java.math.BigDecimal;
+
 public class Constante {
 	
-	public final static Long  MONTO_REIIRO_MAXIMO= 1000L; 
+	public final static BigDecimal  MONTO_REIIRO_MAXIMO= new BigDecimal( 1000L); 
 
 	public final static String SALDO_NO_DISPONIBLE= "Saldo no disponible";
 	

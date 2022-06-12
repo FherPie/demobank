@@ -63,6 +63,13 @@ public class Movimiento  implements Serializable {/**
 	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	@JsonIgnore
 	private Cuenta cuenta;
-		
+
+	@Override
+	public String toString() {
+		return "Movimiento [movimientoId=" + movimientoId + ", tipo=" + tipo + ", saldo=" + saldo + ", valor=" + valor
+				+ ", fecha=" + fecha + ", cuenta=" + cuenta + "]";
+	}
+	
+	
 
 }

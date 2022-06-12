@@ -1,11 +1,15 @@
 package com.example.demo.dtos;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
+@Builder
 @Data
+@AllArgsConstructor
 public class ReporteCuentasDto {
 
-	private String fechaReporte;
+	private String fecha;
 	private String nombreCliente;
 	private String numeroCuenta;
 	private String tipoCuenta;

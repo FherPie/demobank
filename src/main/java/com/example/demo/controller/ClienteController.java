@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,18 +42,30 @@ public class ClienteController {
 	
 	
 	@GetMapping("/clients")
-	  public ResponseEntity<List<Cliente>> getAllClientesByIdentification(@RequestParam(required = false) String identification) {	
+	  public ResponseEntity<List<RequestClientDto>> getAllClientesByIdentification(@RequestParam(required = false) String identification) {	
 		System.out.println(identification);
+
 	    try {
 	      List<Cliente> clients = new ArrayList<Cliente>();
 	      if (identification == null || identification.isEmpty())
-	    	  clienteRepository.findAll().forEach(clients::add);
+	    	 clienteRepository.findAll().forEach(clients::add);
 	      else
 	    	  clienteRepository.findClienteByIdentification(identification).forEach(clients::add);
-	      if (clients.isEmpty()) {
+	      
+	      List<RequestClientDto> clientesDto=clients.stream().map(x-> {
+	    	  RequestClientDto clienteDto= RequestClientDto.builder().nombre(x.getPersona().getNombre()+" " +x.getPersona().getApellido())
+	    			  .direccion(x.getPersona().getDireccion())
+	    			  .telefono(x.getPersona().getTelefono())
+	    			  .password(x.getPassword())
+	    	          .estado(x.getEstado()).build();
+	    	  return clienteDto;
+	      }).collect(Collectors.toList());;
+	      
+	      
+	      if (clientesDto.isEmpty()) {
 	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	      }
-	      return new ResponseEntity<>(clients, HttpStatus.OK);
+	      return new ResponseEntity<>(clientesDto, HttpStatus.OK);
 	    } catch (Exception e) {
 	    	e.printStackTrace();
 	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,21 +1,28 @@
-version: "3"
+version: "2"
 services:
-  employee-jdbc:
-    image: employee-jdbc
+  mysqldb:
+    image: mysql:5.7
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      - MYSQL_DATABASE=testdb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - boot-mysql
+       
+  app:
+    image: 'demo-boot:latest'
     ports:
       - "8080:8080"
-    networks:
-      - employee-mysql
+    restart: always
     depends_on:
       - mysqldb
- 
-  mysqldb:
-    image: mysql:8
     networks:
-      - employee-mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=bootdb  
-
+      - boot-mysql
+    links:
+      - mysqldb
+      
 networks:
-  employee-mysql: 
+  boot-mysql: 
+ 

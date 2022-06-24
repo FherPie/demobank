@@ -32,7 +32,11 @@ public interface CuentaRepository extends JpaRepository<Cuenta, Long> {
             + " INNER JOIN  "
             + "cuenta.cliente cliente  ")
     List<Cuenta> fecthCuentas();
-		
+    
+    
+    
+    List<Cuenta> findAllByNumeroCuenta(String numeroCuenta);
+    
     
     //TO DO CUENTA CON TODOS LOS MOVIMIENTOS
 //	  @Query("SELECT "

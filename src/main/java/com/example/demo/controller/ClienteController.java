@@ -1,13 +1,13 @@
 package com.example.demo.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.dtos.ClientDto;
 import com.example.demo.modelo.Cliente;
-import com.example.demo.modelo.Persona;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.PersonaRepository;
 import com.example.demo.services.ClientService;
@@ -42,32 +41,15 @@ public class ClienteController {
 	
 	
 	@GetMapping("/clients")
-	  public ResponseEntity<List<RequestClientDto>> getAllClientesByIdentification(@RequestParam(required = false) String identification) {	
+	  public ResponseEntity<List<ClientDto>> getAllClientesByIdentification( @Nullable @RequestParam(required = false) String identification) {	
 		System.out.println(identification);
-
 	    try {
-	      List<Cliente> clients = new ArrayList<Cliente>();
-	      if (identification == null || identification.isEmpty())
-	    	 clienteRepository.findAll().forEach(clients::add);
-	      else
-	    	  clienteRepository.findClienteByIdentification(identification).forEach(clients::add);
-	      
-	      List<RequestClientDto> clientesDto=clients.stream().map(x-> {
-	    	  RequestClientDto clienteDto= RequestClientDto.builder().nombre(x.getPersona().getNombre()+" " +x.getPersona().getApellido())
-	    			  .direccion(x.getPersona().getDireccion())
-	    			  .telefono(x.getPersona().getTelefono())
-	    			  .password(x.getPassword())
-	    	          .estado(x.getEstado()).build();
-	    	  return clienteDto;
-	      }).collect(Collectors.toList());;
-	      
-	      
-	      if (clientesDto.isEmpty()) {
+	      List<ClientDto> clientesDto= clienteService.getAllClientesByIdentification(identification);
+	      if (Objects.isNull(clientesDto) || clientesDto.isEmpty()) {
 	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	      }
 	      return new ResponseEntity<>(clientesDto, HttpStatus.OK);
 	    } catch (Exception e) {
-	    	e.printStackTrace();
 	      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	  }
@@ -83,7 +65,7 @@ public class ClienteController {
 	}
 
 	@PostMapping("/clients")
-	public ResponseEntity<Cliente> createClient(@RequestBody RequestClientDto requestClient) {
+	public ResponseEntity<Cliente> createClient(@RequestBody ClientDto requestClient) {
 		try {
 			return new ResponseEntity<>(clienteService.crearCliente(requestClient), HttpStatus.CREATED);
 		} catch (Exception e) {
@@ -93,33 +75,14 @@ public class ClienteController {
 
 	@PutMapping("/clients/{id}")
 	public ResponseEntity<Cliente> updateCliente(@PathVariable("id") long id, @RequestBody Cliente client) {
-
 		try {
-
-			Optional<Cliente> clientData = clienteRepository.findById(id);
-			if (clientData.isPresent()) {
-				System.out.println(client);
-				System.out.println(clientData.get());
-				Persona person = clientData.get().getPersona();
-				person.setNombre(client.getPersona().getNombre());
-				person.setApellido(client.getPersona().getApellido());
-				person.setDireccion(client.getPersona().getDireccion());
-				person.setEmail(client.getPersona().getEmail());
-				person.setIdentificacion(client.getPersona().getIdentificacion());
-				person.setTelefono(client.getPersona().getTelefono());
-				person.setGenero(client.getPersona().getGenero());
-				Cliente cliente= clientData.get();
-				cliente.setEstado(client.getEstado());
-				cliente.setPassword(client.getPassword());
-				personaRepository.save(person);
-				clienteRepository.save(cliente);
+			Cliente clientData = clienteService.updateCliente(id, client);
+			if (Objects.nonNull(clientData)) {
 				return new ResponseEntity<>(HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

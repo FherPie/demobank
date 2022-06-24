@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.integracion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.controller.ClienteController;
+import com.example.demo.dtos.ClientDto;
 import com.example.demo.modelo.Cliente;
 import com.example.demo.modelo.EEstado;
 import com.example.demo.modelo.EGenero;
@@ -54,7 +55,7 @@ public class ClientControllerTest {
 	public void testAddClienteSuccess() throws URISyntaxException {
 		final String baseUrl = "http://localhost:" + randomServerPort + "/api/clients/";
 		URI uri = new URI(baseUrl);		
-		RequestClientDto requestClient = RequestClientDto.builder().email("clientes@hotmail.com")
+		ClientDto requestClient = ClientDto.builder().email("clientes@hotmail.com")
 				.apellido("Andrade")
 				.nombre("Andres")
 				.direccion("Monjas")
@@ -64,7 +65,7 @@ public class ClientControllerTest {
 				.telefono("098989898")
 				.password("7777")
 				.build();
-		HttpEntity<RequestClientDto> request = new HttpEntity<>(requestClient);
+		HttpEntity<ClientDto> request = new HttpEntity<>(requestClient);
 		System.out.println(baseUrl);
 		ResponseEntity<Cliente> result = this.restTemplate.postForEntity(uri, request, Cliente.class);
 		// Verify request succeed

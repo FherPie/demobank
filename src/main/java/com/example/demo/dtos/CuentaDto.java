@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 @Data
 @AllArgsConstructor
-public class ReporteCuentasDto {
+public class CuentaDto {
 
 	private String fecha;
 	private String nombreCliente;

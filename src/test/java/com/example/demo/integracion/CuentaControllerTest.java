@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.integracion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.controller.ClienteController;
+import com.example.demo.dtos.ClientDto;
 import com.example.demo.dtos.RequestCuentaDto;
 import com.example.demo.modelo.Cliente;
 import com.example.demo.modelo.Cuenta;
@@ -54,8 +54,8 @@ public class CuentaControllerTest {
 		URI uri = new URI(baseUrl);
 		RequestCuentaDto requestCuenta = RequestCuentaDto.builder().estado(EEstado.ACTIVO).numeroCuenta("123456789")
 				.saldoInicial(new BigDecimal(2000)).tipoCuenta(ETipoCuenta.AHORROS).build();
-		RequestClientDto requestClient = RequestClientDto.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestClientDto> request = new HttpEntity<>(requestClient);
+		ClientDto requestClient = ClientDto.builder().cuenta(requestCuenta).clienteId(2L).build();
+		HttpEntity<ClientDto> request = new HttpEntity<>(requestClient);
 		System.out.println(baseUrl);
 		ResponseEntity<Cuenta> result = this.restTemplate.postForEntity(uri, request, Cuenta.class);
 		// Verify request succeed

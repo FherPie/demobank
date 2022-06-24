@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -7,6 +9,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,15 +26,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dtos.ReporteCuentasDto;
-import com.example.demo.dtos.RequestMovimientoDto;
-import com.example.demo.modelo.ETipoMovimiento;
+import com.example.demo.dtos.CuentaDto;
+import com.example.demo.dtos.MensajeMovimientoDto;
+import com.example.demo.dtos.MovimientoDto;
 import com.example.demo.modelo.Movimiento;
+import com.example.demo.reports.MovimientoPDFExporter;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.MovimientoRepository;
 import com.example.demo.services.ClientService;
 import com.example.demo.services.CuentaService;
 import com.example.demo.services.MovimientoService;
+import com.lowagie.text.DocumentException;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -52,15 +58,36 @@ public class MovimientoController {
 	@Autowired
 	MovimientoRepository movimientoRepository;
 
-	@GetMapping("/movimiento")
-	public ResponseEntity<List<Movimiento>> getAllMovimientoByCuentaId(@RequestParam(required = false) Long cuentaId) {
-		System.out.println(cuentaId);
+//	@GetMapping("/movimiento")
+//	public ResponseEntity<List<Movimiento>> getAllMovimientoByCuentaId(@RequestParam(required = false) Long cuentaId) {
+//		System.out.println(cuentaId);
+//		try {
+//			List<Movimiento> movimientos = null;
+//			if (cuentaId == null)
+//				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//			else
+//				movimientos = movimientoRepository.fecthByCuentaId(cuentaId);
+//			if (movimientos == null) {
+//				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//			}
+//			return new ResponseEntity<>(movimientos, HttpStatus.OK);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
+
+	@GetMapping(value = "/movimiento")
+	public ResponseEntity<List<Movimiento>> getAllMovimientoByNumeroCuenta(
+			@RequestParam(required = false) String numeroCuenta) {
+		System.out.println(numeroCuenta);
+		System.out.println("OK POR AQUI");
 		try {
 			List<Movimiento> movimientos = null;
-			if (cuentaId == null)
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			if (numeroCuenta == null || numeroCuenta.isEmpty())
+				movimientos = movimientoRepository.findAll();
 			else
-				movimientos = movimientoRepository.fecthByCuentaId(cuentaId);
+				movimientos = movimientoRepository.fecthByNumeroCuenta(numeroCuenta);
 			if (movimientos == null) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -82,11 +109,7 @@ public class MovimientoController {
 	}
 
 	@PostMapping("/movimiento")
-	public ResponseEntity<String> createMovimiento(@RequestBody RequestMovimientoDto requestMovimiento) {
-		System.out.println(requestMovimiento.getFecha());
-		System.out.println(Locale.getDefault());
-		System.out.println(TimeZone.getDefault());
-		
+	public ResponseEntity<MensajeMovimientoDto> createMovimiento(@RequestBody MovimientoDto requestMovimiento) {
 		try {
 			return new ResponseEntity<>(movimientoService.crearMovimiento(requestMovimiento), HttpStatus.OK);
 		} catch (Exception e) {
@@ -96,7 +119,7 @@ public class MovimientoController {
 
 	@PutMapping("/movimiento/{id}")
 	public ResponseEntity<Movimiento> updateMovimiento(@PathVariable("id") long id,
-			@RequestBody RequestMovimientoDto requestMovimiento) {
+			@RequestBody MovimientoDto requestMovimiento) {
 		try {
 			Optional<Movimiento> movimientoSelected = movimientoRepository.findById(id);
 			if (movimientoSelected.isPresent()) {
@@ -130,42 +153,35 @@ public class MovimientoController {
 	}
 
 	@GetMapping("/reporteMovimientoxCliente")
-	public ResponseEntity<List<ReporteCuentasDto>> getAllMovimientoByClienteId(@RequestParam(required = true) Long clienteId, @RequestParam(required = true) Date startDate, @RequestParam(required = true) Date  endDate  ) {
-		System.out.println(clienteId);
-		System.out.println(startDate);
-		System.out.println(endDate);
-		
-		SimpleDateFormat newFormat = new SimpleDateFormat("dd-MM-yyyy");
-
+	public ResponseEntity<List<CuentaDto>> getAllMovimientoByClienteId(@RequestParam(required = true) Long clienteId,
+			@RequestParam(required = true) Date startDate, @RequestParam(required = true) Date endDate) {
 		try {
-			List<Movimiento>  movimientos = null;
-			if (clienteId == null)
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			else
-				movimientos = movimientoRepository.fecthMovimientoBetweenDatesAndClientID(startDate, endDate, clienteId);
-			   
-			 List<ReporteCuentasDto> reportes= movimientos.stream().map(movimiento -> {
-				 ReporteCuentasDto reporte;
-				reporte = ReporteCuentasDto.builder()
-						 .nombreCliente(movimiento.getCuenta().getCliente().getPersona().getNombre()+ " "+movimiento.getCuenta().getCliente().getPersona().getApellido())
-						 .numeroCuenta(movimiento.getCuenta().getNumeroCuenta())
-						 .saldoDisponible(String.format("%.2f", movimiento.getSaldo()))
-						 .movimiento(String.format("%.2f", movimiento.getValor()))
-						 .tipoCuenta(movimiento.getCuenta().getTipoCuenta().toString())
-						 .fecha( newFormat.format(movimiento.getFecha()))
-						 .estado(movimiento.getCuenta().getEstado().toString())
-						 .saldoInicial(String.format("%.2f",movimiento.getCuenta().getSaldoInicial()))
-						 .build();
-				  return reporte;
-			 }).collect(Collectors.toList());;
-			
-			if (reportes == null) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(reportes	, HttpStatus.OK);
+			List<CuentaDto> listaReporte = movimientoService.getAllMovimientoByClienteId(clienteId, startDate, endDate);
+			return new ResponseEntity<>(listaReporte, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+	}
+
+	@GetMapping("/reporteMovimientoxCliente/export/pdf")
+	public void exportToPDF(HttpServletResponse response, @RequestParam(required = true) Long clienteId,
+			@RequestParam(required = true) Date startDate, @RequestParam(required = true) Date endDate)
+			throws DocumentException, IOException {
+		try {
+			List<CuentaDto> listaReporte = movimientoService.getAllMovimientoByClienteId(clienteId, startDate, endDate);
+			response.setContentType("application/pdf");
+			DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+			String currentDateTime = dateFormatter.format(new Date());
+			String headerKey = "Content-Disposition";
+			String headerValue = "attachment; filename=movimientos_" + currentDateTime + ".pdf";
+			response.setHeader(headerKey, headerValue);
+			MovimientoPDFExporter exporter = new MovimientoPDFExporter(listaReporte);
+			exporter.export(response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
 	}
 

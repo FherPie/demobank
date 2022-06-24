@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.integracion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,9 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.controller.MovimientoController;
+import com.example.demo.dtos.ClientDto;
 import com.example.demo.dtos.RequestCuentaDto;
-import com.example.demo.dtos.RequestMovimientoDto;
+import com.example.demo.dtos.MovimientoDto;
 import com.example.demo.modelo.Cuenta;
 import com.example.demo.modelo.EEstado;
 import com.example.demo.modelo.ETipoCuenta;
@@ -58,8 +59,8 @@ public class MovimientoControllerTest {
 		URI uri = new URI(baseUrl);
 		RequestCuentaDto requestCuenta = RequestCuentaDto.builder().estado(EEstado.ACTIVO).numeroCuenta("123456789")
 				.saldoInicial(new BigDecimal(2000)).tipoCuenta(ETipoCuenta.AHORROS).build();
-		RequestClientDto requestClient = RequestClientDto.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestClientDto> request = new HttpEntity<>(requestClient);
+		ClientDto requestClient = ClientDto.builder().cuenta(requestCuenta).clienteId(2L).build();
+		HttpEntity<ClientDto> request = new HttpEntity<>(requestClient);
 		System.out.println(baseUrl);
 		ResponseEntity<Cuenta> result = this.restTemplate.postForEntity(uri, request, Cuenta.class);
 		// Verify request succeed
@@ -72,11 +73,11 @@ public class MovimientoControllerTest {
 		final String baseUrl = "http://localhost:" + randomServerPort + "/api/movimiento/";
 		URI uri = new URI(baseUrl);
 		
-		RequestMovimientoDto requestMovimiento = RequestMovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
+		MovimientoDto requestMovimiento = MovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
 				.tipo(ETipoMovimiento.DEPOSITO).valor(new BigDecimal(5000)).build();
 		
 		//RequestClient requestClient = RequestClient.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestMovimientoDto> request = new HttpEntity<>(requestMovimiento);
+		HttpEntity<MovimientoDto> request = new HttpEntity<>(requestMovimiento);
 		System.out.println(baseUrl);
 		ResponseEntity<Boolean> result = this.restTemplate.postForEntity(uri, request, Boolean.class);
 		// Verify request succeed
@@ -90,11 +91,11 @@ public class MovimientoControllerTest {
 		final String baseUrl = "http://localhost:" + randomServerPort + "/api/movimiento/";
 		URI uri = new URI(baseUrl);
 		
-		RequestMovimientoDto requestMovimiento = RequestMovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
+		MovimientoDto requestMovimiento = MovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
 				.tipo(ETipoMovimiento.RETIRO).valor(new BigDecimal(50000)).build();
 		
 		//RequestClient requestClient = RequestClient.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestMovimientoDto> request = new HttpEntity<>(requestMovimiento);
+		HttpEntity<MovimientoDto> request = new HttpEntity<>(requestMovimiento);
 		System.out.println(baseUrl);
 		ResponseEntity<Boolean> result = this.restTemplate.postForEntity(uri, request, Boolean.class);
 		// Verify request succeed
@@ -108,11 +109,11 @@ public class MovimientoControllerTest {
 		final String baseUrl = "http://localhost:" + randomServerPort + "/api/movimiento/";
 		URI uri = new URI(baseUrl);
 		
-		RequestMovimientoDto requestMovimiento = RequestMovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
+		MovimientoDto requestMovimiento = MovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
 				.tipo(ETipoMovimiento.RETIRO).valor(new BigDecimal(12000)).build();
 		
 		//RequestClient requestClient = RequestClient.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestMovimientoDto> request = new HttpEntity<>(requestMovimiento);
+		HttpEntity<MovimientoDto> request = new HttpEntity<>(requestMovimiento);
 		System.out.println(baseUrl);
 		ResponseEntity<Boolean> result = this.restTemplate.postForEntity(uri, request, Boolean.class);
 		// Verify request succeed
@@ -125,11 +126,11 @@ public class MovimientoControllerTest {
 		final String baseUrl = "http://localhost:" + randomServerPort + "/api/movimiento/";
 		URI uri = new URI(baseUrl);
 		
-		RequestMovimientoDto requestMovimiento = RequestMovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
+		MovimientoDto requestMovimiento = MovimientoDto.builder().cuentaId(4L).saldo(new BigDecimal(2000))
 				.tipo(ETipoMovimiento.RETIRO).valor(new BigDecimal(1000)).build();
 		
 		//RequestClient requestClient = RequestClient.builder().cuenta(requestCuenta).clienteId(2L).build();
-		HttpEntity<RequestMovimientoDto> request = new HttpEntity<>(requestMovimiento);
+		HttpEntity<MovimientoDto> request = new HttpEntity<>(requestMovimiento);
 		System.out.println(baseUrl);
 		ResponseEntity<Boolean> result = this.restTemplate.postForEntity(uri, request, Boolean.class);
 		// Verify request succeed
@@ -170,14 +171,14 @@ public class MovimientoControllerTest {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("id", "19");
 		
-		RequestMovimientoDto requestMovimiento= RequestMovimientoDto.builder()
+		MovimientoDto requestMovimiento= MovimientoDto.builder()
 				.saldo(new BigDecimal(3000))
 				.tipo(ETipoMovimiento.RETIRO)
 				.fecha(new Date())
 				.valor(new BigDecimal(10000))
 				.build();
 	
-		HttpEntity<RequestMovimientoDto> request = new HttpEntity<>(requestMovimiento);
+		HttpEntity<MovimientoDto> request = new HttpEntity<>(requestMovimiento);
 		
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
 	

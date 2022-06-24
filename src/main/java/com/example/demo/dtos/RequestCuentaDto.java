@@ -19,13 +19,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RequestCuentaDto {
 	
-
-
 	private String numeroCuenta;
     private ETipoCuenta tipoCuenta;
     @NotNull
     private BigDecimal saldoInicial;
     private EEstado estado;
     private String cliente;
-
+    private String cuentaId;
+    private Long clienteId;
 }

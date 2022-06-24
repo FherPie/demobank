@@ -1,0 +1,107 @@
+package com.example.demo.reports;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.example.demo.dtos.CuentaDto;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+
+public class MovimientoPDFExporter {
+
+	private List<CuentaDto> listCuentaDtos;
+    
+    public MovimientoPDFExporter(List<CuentaDto> listCuentaDtos) {
+        this.listCuentaDtos = listCuentaDtos;
+    }
+ 
+    private void writeTableHeader(PdfPTable table) {
+        PdfPCell cell = new PdfPCell();
+        cell.setBackgroundColor(Color.BLUE);
+        cell.setPadding(3);
+        cell.setPaddingRight(0);
+        
+         
+        Font font = FontFactory.getFont(FontFactory.HELVETICA);
+        font.setColor(Color.WHITE);
+         
+        cell.setPhrase(new Phrase("Fecha", font));
+         
+        table.addCell(cell);
+         
+        cell.setPhrase(new Phrase("Nombre Cliente", font));
+        table.addCell(cell);
+         
+        cell.setPhrase(new Phrase("Numero Cuenta", font));
+        table.addCell(cell);
+         
+        cell.setPhrase(new Phrase("Tipo Cuenta", font));
+        table.addCell(cell);
+         
+        cell.setPhrase(new Phrase("Saldo Inicial", font));
+        table.addCell(cell);
+        
+        cell.setPhrase(new Phrase("Estado", font));
+        table.addCell(cell);    
+        
+
+        cell.setPhrase(new Phrase("Movimiento", font));
+        table.addCell(cell);    
+        
+        
+        cell.setPhrase(new Phrase("Saldo Disponible", font));
+        table.addCell(cell);    
+    }
+     
+    private void writeTableData(PdfPTable table) {
+        for (CuentaDto cuentaDto : listCuentaDtos) {
+            table.addCell(cuentaDto.getFecha());
+            table.addCell(cuentaDto.getNombreCliente());
+            table.addCell(cuentaDto.getNumeroCuenta());
+            table.addCell(cuentaDto.getTipoCuenta());
+            table.addCell(cuentaDto.getSaldoInicial());
+            table.addCell(cuentaDto.getEstado());
+            table.addCell(cuentaDto.getMovimiento());
+            table.addCell(cuentaDto.getSaldoDisponible());
+        }
+    }
+     
+    public void export(HttpServletResponse response) throws DocumentException, IOException {
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, response.getOutputStream());
+         
+        document.open();
+        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+        font.setSize(14);
+        font.setColor(Color.BLUE);
+         
+        Paragraph p = new Paragraph("List de Movimientos", font);
+        p.setAlignment(Paragraph.ALIGN_CENTER);
+         
+        document.add(p);
+         
+        PdfPTable table = new PdfPTable(8);
+        table.setWidthPercentage(100f);
+        table.setWidths(new float[] {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f});
+        table.setSpacingBefore(10);
+         
+        writeTableHeader(table);
+        writeTableData(table);
+         
+        document.add(table);
+         
+        document.close();
+         
+    }
+}

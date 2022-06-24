@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dtos.RequestClientDto;
+import com.example.demo.dtos.ClientDto;
 import com.example.demo.dtos.RequestCuentaDto;
 import com.example.demo.modelo.Cuenta;
 import com.example.demo.repository.ClienteRepository;
@@ -46,14 +47,14 @@ public class CuentaController {
 	CuentaRepository cuentaRepository;
 	
 	@GetMapping("/cuenta")
-	  public ResponseEntity<List<RequestCuentaDto>> getAllCuentaByClienteIdentification(@RequestParam(required = false) Long cliendId) {	
-		System.out.println(cliendId);
+	  public ResponseEntity<List<RequestCuentaDto>> getAllCuentaByClienteIdentification(@RequestParam(required = false) String numeroCuenta) {	
+		System.out.println(numeroCuenta);
 	    try {
 	    	List<Cuenta> listCuenta = null;
-	      if (cliendId==null)
+	      if (numeroCuenta==null || numeroCuenta.equals("null"))
 	    	  listCuenta= cuentaRepository.fecthCuentas();
 	      else
-	    	  listCuenta= cuentaRepository.fecthByCliente(cliendId);
+	    	  listCuenta= cuentaRepository.findAllByNumeroCuenta(numeroCuenta);
 	      
 	   List<RequestCuentaDto> listaRequestCuentaDto=   listCuenta.stream().map(cuenta-> {
 	    	  RequestCuentaDto requestCuenta= RequestCuentaDto.builder()
@@ -62,6 +63,7 @@ public class CuentaController {
 	    			  .saldoInicial(cuenta.getSaldoInicial())
 	    			  .estado(cuenta.getEstado())
 	    			  .cliente(cuenta.getCliente().getPersona().getNombre()+" "+cuenta.getCliente().getPersona().getApellido())
+	    			  .cuentaId(String.valueOf(cuenta.getCuentaId()))
 	    			  .build();
 	    	  return requestCuenta;
 	      }).collect(Collectors.toList());
@@ -77,27 +79,29 @@ public class CuentaController {
 	  }
 
 	@GetMapping("/cuenta/{id}")
-	public ResponseEntity<Cuenta> getCuentaById(@PathVariable("id") long id) {
-		Optional<Cuenta> cuentaData = cuentaRepository.findById(id);
-		if (cuentaData.isPresent()) {
-			return new ResponseEntity<>(cuentaData.get(), HttpStatus.OK);
+	public ResponseEntity<RequestCuentaDto> getCuentaById(@PathVariable("id") long id) {
+		RequestCuentaDto cuentaDto = cuentaService.getCuentaById(id);
+		if (Objects.nonNull(cuentaDto)) {
+			return new ResponseEntity<>(cuentaDto, HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
 	@PostMapping("/cuenta")
-	public ResponseEntity<Cuenta> createCuenta(@RequestBody RequestClientDto requestClient) {
+	public ResponseEntity<Cuenta> createCuenta(@RequestBody RequestCuentaDto requestCuenta) {
 		try {
-			return new ResponseEntity<>(cuentaService.crearCuenta(requestClient), HttpStatus.CREATED);
+			return new ResponseEntity<>(cuentaService.crearCuenta(requestCuenta), HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@SuppressWarnings("static-access")
+
 	@PutMapping("/cuenta/{id}")
 	public ResponseEntity<Cuenta> updateCuenta(@PathVariable("id") long id, @RequestBody RequestCuentaDto requestCuenta) {
+		System.out.println(id);
+		System.out.println(requestCuenta.toString());
 		try {
 			Optional<Cuenta> cuentaSelected = cuentaRepository.findById(id);
 			if (cuentaSelected.isPresent()) {

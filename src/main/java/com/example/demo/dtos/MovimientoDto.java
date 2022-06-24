@@ -18,7 +18,7 @@ import lombok.Setter;
 @Builder
 @Getter @Setter @NoArgsConstructor 
 @AllArgsConstructor
-public class RequestMovimientoDto {
+public class MovimientoDto {
 
 	private long id;
 	private String numeroCuenta;
@@ -27,7 +27,7 @@ public class RequestMovimientoDto {
     private BigDecimal saldo;
     @NotNull
     private BigDecimal valor;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyy-MM-dd", locale = "es_ES", timezone = "America/Guayaquil")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "es_ES", timezone = "America/Guayaquil")
 	private Date fecha;
 	private Long cuentaId;
 	

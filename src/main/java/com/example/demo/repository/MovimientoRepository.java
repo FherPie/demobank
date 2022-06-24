@@ -29,6 +29,16 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     List<Movimiento> fecthByCuentaId(long cuentaId);
 		
 	
+    
+    @Query("SELECT "
+            + " (movimiento) from Movimiento movimiento "
+            + " INNER JOIN  "
+            + "movimiento.cuenta cuenta  "
+            + "WHERE "
+            + "cuenta.numeroCuenta = :numeroCuenta")
+    List<Movimiento> fecthByNumeroCuenta(String numeroCuenta);
+		
+    
 
     @Query("SELECT "
             + " (movimiento) from Movimiento movimiento "

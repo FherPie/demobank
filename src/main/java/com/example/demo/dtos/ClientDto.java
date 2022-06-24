@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor 
 @AllArgsConstructor
 @JsonInclude(Include.NON_NULL)
-public class RequestClientDto {
+public class ClientDto {
 
 	private String password;
 
